@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ことばポケット | 英単語帳</title>
+<style>
+:root{--ink:#1f2a44;--muted:#667085;--paper:#f7f8fc;--card:#fff;--blue:#5268e8;--mint:#dff7ec;--line:#e6e9f2;--pink:#ffe7ee}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:28px 20px 22px;background:linear-gradient(130deg,#e8edff,#e2fbf2);border-bottom:1px solid var(--line)}
+.wrap{max-width:1000px;margin:auto}.eyebrow{font-size:.78rem;font-weight:800;letter-spacing:.12em;color:#5268a9;text-transform:uppercase}
+h1{font-size:clamp(1.8rem,5vw,2.7rem);margin:8px 0}header p{margin:0;color:#4f5d76}.main{max-width:1000px;margin:22px auto;padding:0 16px 40px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}.stat{background:var(--card);padding:14px;border:1px solid var(--line);border-radius:16px}.stat strong{display:block;font-size:1.45rem}.stat span{color:var(--muted);font-size:.82rem}
+.tools{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px}.tools input,.tools select{flex:1;min-width:150px;border:1px solid var(--line);background:white;border-radius:12px;padding:12px;font:inherit;color:var(--ink)}
+.tabs{display:flex;gap:8px;overflow:auto;padding:3px 0 13px}.tab,button{border:0;border-radius:11px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}.tab{background:#eceef7;color:#59627a;white-space:nowrap}.tab.active{background:var(--ink);color:white}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:13px}.word{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:0 4px 14px #1d2b4a08;display:flex;flex-direction:column;gap:10px}.wordtop{display:flex;justify-content:space-between;align-items:center;gap:8px}.tag{font-size:.74rem;background:var(--mint);padding:5px 9px;border-radius:99px;color:#236b50;font-weight:800}.star{background:#f3f4fa;color:#69738b;padding:7px 10px}.star.saved{background:#fff0bd;color:#775900}.english{font-size:1.55rem;font-weight:850;letter-spacing:-.03em}.japanese{font-size:1.05rem;font-weight:700}.example{background:#f7f8fc;border-radius:12px;padding:11px;font-size:.9rem;color:#4e5b73}.example b{color:#293858}.actions{display:flex;gap:8px;margin-top:auto}.actions button{flex:1;background:#edf0ff;color:#4255c4}.actions button:last-child{background:#e8f8f0;color:#26714e}.empty{padding:32px;text-align:center;color:var(--muted);grid-column:1/-1}
+.quizbox{background:white;border:1px solid var(--line);border-radius:20px;padding:22px;text-align:center;max-width:650px;margin:0 auto}.quizword{font-size:2rem;font-weight:900;margin:18px 0}.answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}.answers button{background:#f0f2fa;text-align:left}.answers button:hover{background:#e4e9ff}.feedback{min-height:28px;font-weight:800;margin:13px 0}.primary{background:var(--blue);color:white}.secondary{background:#eceef7;color:var(--ink)}.small{font-size:.82rem;color:var(--muted)}footer{text-align:center;padding:20px;color:var(--muted);font-size:.8rem}
+@media(max-width:520px){.stats{gap:7px}.stat{padding:10px}.answers{grid-template-columns:1fr}.word{padding:15px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="eyebrow">YOUR EVERYDAY ENGLISH</div><h1>ことばポケット 📚</h1><p>毎日つかえる英語を、ひとつずつポケットに。</p></div></header>
+<main class="main">
+<section class="stats">
+<div class="stat"><strong id="total">0</strong><span>収録単語</span></div>
+<div class="stat"><strong id="savedCount">0</strong><span>お気に入り</span></div>
+<div class="stat"><strong id="learnedCount">0</strong><span>覚えた単語</span></div>
+</section>
+<div class="tools"><input id="search" type="search" placeholder="英語・日本語で検索…"><select id="level"><option value="all">すべてのレベル</option><option>初級</option><option>中級</option></select></div>
+<nav class="tabs" id="tabs">
+<button class="tab active" data-cat="すべて">🌟 すべて</button><button class="tab" data-cat="あいさつ">👋 あいさつ</button><button class="tab" data-cat="日常会話">💬 日常会話</button><button class="tab" data-cat="学校">🏫 学校</button><button class="tab" data-cat="気持ち">💗 気持ち</button><button class="tab" data-cat="旅行">✈️ 旅行</button><button class="tab" data-cat="食べ物">🍙 食べ物</button><button class="tab" data-cat="お気に入り">⭐ お気に入り</button><button class="tab" data-cat="覚えた">✅ 覚えた</button>
+</nav>
+<div id="list" class="grid"></div>
+<section id="quiz" hidden>
+<div class="quizbox"><div class="eyebrow">QUICK QUIZ</div><h2>ミニ単語テスト 🎯</h2><p class="small">英単語の意味を選ぼう！</p><div id="quizProgress" class="small"></div><div id="quizword" class="quizword"></div><div id="answers" class="answers"></div><div id="feedback" class="feedback" aria-live="polite"></div><button id="next" class="primary" hidden>次の問題 →</button><button id="restart" class="secondary">テストを最初から</button></div>
+</section>
+<div style="display:flex;justify-content:center;margin:20px 0"><button id="quizToggle" class="primary">🎯 単語テストに挑戦</button></div>
+</main>
+<footer>ことばポケット · お気に入りと学習状況はこのブラウザに保存されます。</footer>
+<script>
+const words=[
+["hello","こんにちは","あいさつ","初級","Hello! How are you?","こんにちは！元気？"],
+["good morning","おはよう","あいさつ","初級","Good morning, everyone.","みなさん、おはよう。"],
+["thank you","ありがとう","あいさつ","初級","Thank you for your help.","手伝ってくれてありがとう。"],
+["you're welcome","どういたしまして","あいさつ","初級","You're welcome!","どういたしまして！"],
+["excuse me","すみません","あいさつ","初級","Excuse me, where is the station?","すみません、駅はどこですか？"],
+["sorry","ごめんなさい","あいさつ","初級","I'm sorry I'm late.","遅れてごめんなさい。"],
+["please","お願いします","あいさつ","初級","One coffee, please.","コーヒーをひとつお願いします。"],
+["see you later","またあとで","あいさつ","初級","See you later at school.","学校でまたあとでね。"],
+["How's it going?","調子どう？","日常会話","初級","Hey, how's it going?","やあ、調子どう？"],
+["I'm not sure","よく分からない","日常会話","初級","I'm not sure about that.","それについてはよく分からない。"],
+["Sounds good","いいね／よさそう","日常会話","初級","Let's meet at three. Sounds good!","3時に会おう。いいね！"],
+["No problem","問題ないよ","日常会話","初級","No problem. I can help.","問題ないよ。手伝えるよ。"],
+["Just a minute","ちょっと待って","日常会話","初級","Just a minute, please.","ちょっと待ってね。"],
+["I got it","分かった","日常会話","初級","I got it now.","今、分かったよ。"],
+["What do you mean?","どういう意味？","日常会話","中級","What do you mean by that?","それはどういう意味？"],
+["I'm looking for…","…を探しています","日常会話","中級","I'm looking for my phone.","スマホを探しています。"],
+["homework","宿題","学校","初級","I finished my homework.","宿題を終わらせた。"],
+["classmate","クラスメート","学校","初級","She is my classmate.","彼女はクラスメートです。"],
+["I forgot","忘れた","学校","初級","I forgot my notebook.","ノートを忘れた。"],
+["Could you help me?","手伝ってくれますか？","学校","中級","Could you help me with this?","これを手伝ってくれますか？"],
+["happy","うれしい","気持ち","初級","I'm happy today.","今日はうれしい。"],
+["nervous","緊張している","気持ち","中級","I'm nervous about the test.","テストで緊張している。"],
+["tired","疲れた","気持ち","初級","I'm tired after school.","学校のあとで疲れた。"],
+["excited","ワクワクしている","気持ち","中級","I'm excited about the trip.","旅行が楽しみ。"],
+["hungry","おなかがすいた","食べ物","初級","I'm getting hungry.","おなかがすいてきた。"],
+["delicious","おいしい","食べ物","初級","This cake is delicious.","このケーキはおいしい。"],
+["I'd like…","…をください／…がほしいです","食べ物","中級","I'd like a glass of water.","水を一杯ください。"],
+["check, please","お会計お願いします","食べ物","中級","Could we have the check, please?","お会計をお願いします。"],
+["Where is the station?","駅はどこですか？","旅行","初級","Excuse me, where is the station?","すみません、駅はどこですか？"],
+["How much is it?","いくらですか？","旅行","初級","How much is it?","これはいくらですか？"],
+["I'm lost","道に迷いました","旅行","初級","I'm lost. Can you help me?","道に迷いました。助けてもらえますか？"],
+["ticket","切符／チケット","旅行","初級","I need a train ticket.","電車の切符が必要です。"],
+["What time is it?","今何時ですか？","日常会話","初級","Excuse me, what time is it?","すみません、今何時ですか？"],
+["maybe","たぶん／もしかすると","日常会話","初級","Maybe we can go tomorrow.","明日なら行けるかも。"],
+["actually","実は／実際は","日常会話","中級","Actually, I live nearby.","実は、この近くに住んでいます。"],
+["take your time","ゆっくりでいいよ","日常会話","中級","Take your time. No rush.","ゆっくりでいいよ。急がなくて大丈夫。"],
+["good luck","頑張って／幸運を祈る","あいさつ","初級","Good luck on your test!","テスト頑張って！"],
+["awesome","最高！／すごい！","気持ち","初級","That game is awesome!","あのゲーム、最高！"],
+["boring","退屈な","気持ち","初級","This movie is boring.","この映画は退屈だ。"],
+["keep in touch","連絡を取り合う","日常会話","中級","Let's keep in touch.","これからも連絡を取り合おう。"]
+].map((w,i)=>({id:i,en:w[0],ja:w[1],cat:w[2],level:w[3],ex:w[4],exja:w[5]}));
+const $=s=>document.querySelector(s);
+let category="すべて", quizMode=false, quizDeck=[], qi=0, score=0, answered=false;
+const load=(k,def)=>{try{return JSON.parse(localStorage.getItem(k))||def}catch{return def}};
+let saved=load("kotoba_saved",[]), learned=load("kotoba_learned",[]);
+function persist(){localStorage.setItem("kotoba_saved",JSON.stringify(saved));localStorage.setItem("kotoba_learned",JSON.stringify(learned));}
+function stats(){$("#total").textContent=words.length;$("#savedCount").textContent=saved.length;$("#learnedCount").textContent=learned.length;}
+function render(){
+ const q=$("#search").value.trim().toLowerCase(), lev=$("#level").value;
+ let filtered=words.filter(w=>(category==="すべて"|| (category==="お気に入り"?saved.includes(w.id):category==="覚えた"?learned.includes(w.id):w.cat===category))&&(lev==="all"||w.level===lev)&&(!q||(w.en+" "+w.ja+" "+w.ex).toLowerCase().includes(q)));
+ $("#list").innerHTML=filtered.length?filtered.map(w=>`<article class="word"><div class="wordtop"><span class="tag">${w.cat} · ${w.level}</span><button class="star ${saved.includes(w.id)?"saved":""}" data-star="${w.id}" aria-label="お気に入り">${saved.includes(w.id)?"★":"☆"}</button></div><div class="english">${w.en}</div><div class="japanese">${w.ja}</div><div class="example"><b>${w.ex}</b><br>${w.exja}</div><div class="actions"><button data-speak="${w.id}">🔊 発音</button><button data-learn="${w.id}">${learned.includes(w.id)?"✓ 覚えた！":"覚えた"}</button></div></article>`).join(""):'<div class="empty">見つからへんかった！検索ワードを変えてみてな 🔎</div>';
+ stats();
+}
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-cat]");if(!b)return;category=b.dataset.cat;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t===b));quizMode=false;$("#quiz").hidden=true;$("#list").hidden=false;$("#quizToggle").hidden=false;render()});
+$("#search").addEventListener("input",render);$("#level").addEventListener("change",render);
+$("#list").addEventListener("click",e=>{
+ const star=e.target.closest("[data-star]"), learn=e.target.closest("[data-learn]"), speak=e.target.closest("[data-speak]");
+ if(star){const id=+star.dataset.star;saved=saved.includes(id)?saved.filter(x=>x!==id):[...saved,id];persist();render()}
+ if(learn){const id=+learn.dataset.learn;learned=learned.includes(id)?learned.filter(x=>x!==id):[...learned,id];persist();render()}
+ if(speak){const w=words.find(x=>x.id===+speak.dataset.speak);if("speechSynthesis"in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(w.en);u.lang="en-US";speechSynthesis.speak(u)}else alert("このブラウザは音声読み上げに対応していません。")}
+});
+function startQuiz(){quizMode=true;category="すべて";quizDeck=[...words].sort(()=>Math.random()-.5).slice(0,10);qi=0;score=0;$("#list").hidden=true;$("#quiz").hidden=false;$("#quizToggle").hidden=true;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.cat==="すべて"));showQuestion()}
+function showQuestion(){
+ answered=false;$("#feedback").textContent="";$("#next").hidden=true;
+ if(qi>=quizDeck.length){$("#quizProgress").textContent=`10問終了 · ${score}問正解`;$("#quizword").textContent=`${score} / ${quizDeck.length} 問正解 🎉`;$("#answers").innerHTML='<p>おつかれさま！もう一度挑戦してみよう。</p>';$("#next").hidden=true;return}
+ const w=quizDeck[qi];$("#quizProgress").textContent=`第 ${qi+1} 問 / ${quizDeck.length} 問`;$("#quizword").textContent=w.en;
+ let opts=[w,...words.filter(x=>x.id!==w.id).sort(()=>Math.random()-.5).slice(0,3)].sort(()=>Math.random()-.5);
+ $("#answers").innerHTML=opts.map(o=>`<button data-answer="${o.id}">${o.ja}</button>`).join("");
+}
+$("#answers").addEventListener("click",e=>{const b=e.target.closest("[data-answer]");if(!b||answered||qi>=quizDeck.length)return;answered=true;const w=quizDeck[qi];const ok=+b.dataset.answer===w.id;if(ok)score++;$("#feedback").textContent=ok?"正解！ 🎉":"おしい！ 正解は「"+w.ja+"」";$("#answers").querySelectorAll("button").forEach(x=>{x.disabled=true;if(+x.dataset.answer===w.id)x.style.background="#dff7ec"});$("#next").hidden=false;});
+$("#next").addEventListener("click",()=>{qi++;showQuestion()});$("#restart").addEventListener("click",startQuiz);$("#quizToggle").addEventListener("click",startQuiz);
+render();
+</script>
+</body></html>
